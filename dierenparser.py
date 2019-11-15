@@ -17,7 +17,7 @@ class Dier:
     kleur: str
     geluid: str
 
-    def insertSQL(self) -> float:
+    def insertSQL(self):
         c.execute("""INSERT INTO dieren(naam, soort, aantalPoten, kleur, geluid) 
                VALUES (?,?,?,?,?);""", (self.naam, self.soort, self.aantalPoten, self.kleur, self.geluid))
 
