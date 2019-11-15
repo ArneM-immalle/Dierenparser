@@ -1,13 +1,34 @@
 from dataclasses import dataclass
+import sqlite3, os
+
+
+if (os.path.exists('dieren.db')):
+    os.remove('dieren.db')
+conn = sqlite3.connect('dieren.db')
+c = conn.cursor()
+c.execute('''CREATE TABLE dieren (naam text, soort text, aantalPoten integer, kleur text, geluid text)''')
 
 
 @dataclass
 class Dier:
     naam: str
-    soort: ""
-    aantalPoten: 0
-    kleur: ""
-    geluid: ""
+    soort: str
+    aantalPoten: int
+    kleur: str
+    geluid: str
+
+    def insertSQL(self) -> float:
+        c.execute("""INSERT INTO dieren(naam, soort, aantalPoten, kleur, geluid) 
+               VALUES (?,?,?,?,?);""", (self.naam, self.soort, self.aantalPoten, self.kleur, self.geluid))
+
+        # Save (commit) the changes
+        conn.commit()
+
+def getData(manier):
+    if manier == "naam":
+        return c.execute("SELECT * FROM dieren ORDER BY naam ASC")
+    else:
+        return c.execute("SELECT * FROM dieren ORDER BY soort ASC")
 
 
 def parse_line(line : str) -> Dier:
@@ -26,14 +47,19 @@ def parse_text(str : str) -> [Dier]:
 
 if __name__ == '__main__':
     dieren = []
-    # r = tekst lezen
-    # rb = binaire code lezen (image)
-    # w = schrijven
-    
-    # functie "open" is contentmanager
-    # dankzij with niet nodig om file te closen
     with open('dieren.txt', 'r') as f:
         dieren = parse_text(f.read())
 
     for dier in dieren:
+        dier.insertSQL()
         print(dier)
+    
+    for dier in getData("naam"):
+        print(dier)
+    
+    for dier in getData("soort"):
+        print(dier)
+
+# We can also close the connection if we are done with it.
+# Just be sure any changes have been committed or they will be lost.
+conn.close()
